@@ -1,52 +1,39 @@
-# Prerequisites
-*.d
+# cached files
+__pycache__/
+*.py[cod]
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
-
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
+# project hidden
+*.c
+*.cpp
+*.html
 *.so
-*.so.*
-*.dylib
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+wheelhouse/
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+# installation package
+.eggs
+*.egg-info/
+dist/
+build/
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# pycharm
+.idea/
+
+# vscode
+.vscode/
+*.code-workspace
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+mypy.ini

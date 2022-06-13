@@ -1,0 +1,47 @@
+[build-system]
+requires = [
+    "setuptools",
+    "wheel"
+]
+
+[tool.mypy]
+python_version = 3.6
+
+# Disallow dynamic typing
+disallow_any_unimported = true
+disallow_any_expr = true
+disallow_any_decorated = true
+disallow_any_generics = true
+disallow_any_explicit = true
+disallow_subclassing_any = true
+
+# Disallow untyped definitions and calls
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+
+# None and optional handling
+no_implicit_optional = true
+
+# Configuring warnings
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = true
+warn_redundant_casts = true
+
+# Misc things
+strict_equality = true
+
+# Config file
+warn_unused_configs = true
+
+[tool.cibuildwheel.linux]
+test-command = "cd {project} && python setup.py test"
+
+[tool.cibuildwheel.macos]
+test-command = "cd {project} && python setup.py test"
+
+[tool.cibuildwheel.windows]
+test-command = "python -c \"import subprocess,os,sys; os.chdir(sys.argv[1]); subprocess.call(['python','setup.py','test'])\" {project}"
