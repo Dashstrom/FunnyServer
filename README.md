@@ -1,0 +1,2 @@
+# FunnyServer
+Just funny server
