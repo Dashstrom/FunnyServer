@@ -5,7 +5,7 @@ from string import ascii_letters, digits
 from _thread import start_new_thread
 
 from .response import (
-    FileResponse, Response, ACCEPT, DENY, UPLOAD, DOWNLOAD, LIST
+    FileResponse, Response, ACCEPT, DENY, UPLOAD, DOWNLOAD, LIST, DELETE
 )
 
 HOST = '127.0.0.1'
@@ -56,6 +56,15 @@ class FileServer:
                 matching_files.append(file)
         res = FileResponse("\n".join(matching_files).encode())
         return res.pack()
+    
+    def delete_file(self, filename: str) -> bytes:
+        fpath = os.path.join(STORAGE_DIR, filename)
+        if not os.path.exists(fpath):
+            res = Response(DENY)
+        else:
+            os.remove(fpath)
+            res = Response(ACCEPT)
+        return res.pack()
 
 
 def file_thread(conn: socket.socket, fs: FileServer) -> None:
@@ -73,5 +82,7 @@ def file_thread(conn: socket.socket, fs: FileServer) -> None:
             data = fs.download_file(filename)
         elif code == LIST:
             data = fs.list_files(filename)
+        elif code == DELETE:
+            data = fs.delete_file(filename)
     conn.sendall(data)
     conn.close()
