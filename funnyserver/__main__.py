@@ -1,5 +1,5 @@
 """File call when module is called as script."""
-from server import FileServer
+from .server import FileServer
 
 
 def main() -> None:
