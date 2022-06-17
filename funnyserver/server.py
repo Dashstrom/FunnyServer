@@ -4,7 +4,9 @@ from struct import unpack
 
 from _thread import start_new_thread
 
-from response import FileResponse, Response, ACCEPT, DENY, UPLOAD, DOWNLOAD
+from response import (
+    FileResponse, Response, ACCEPT, DENY, UPLOAD, DOWNLOAD, LIST
+)
 
 HOST = '127.0.0.1'
 PORT = 9999
@@ -44,6 +46,15 @@ class FileServer:
         else:
             res = Response(DENY)
         return res.pack()
+    
+    def list_files(self, pattern: str) -> bytes:
+        stored_files = os.listdir(STORAGE_DIR)
+        matching_files = []
+        for file in stored_files:
+            if file.startswith(pattern):
+                matching_files.append(file)
+        res = FileResponse("\n".join(matching_files))
+        return res.pack()
 
 
 def file_thread(conn: socket.socket, fs: FileServer) -> None:
@@ -59,6 +70,8 @@ def file_thread(conn: socket.socket, fs: FileServer) -> None:
         data = fs.upload_file(filename, file)
     elif code == DOWNLOAD:
         data = fs.download_file(filename)
+    elif code == LIST:
+        data = fs.list_files(filename)
     else:
         data = Response(DENY).pack()
     conn.sendall(data)

@@ -3,7 +3,7 @@ from struct import pack
 ACCEPT = 0
 DENY = UPLOAD = 1
 DOWNLOAD = 2
-
+LIST = 3
 
 class Response:
     
