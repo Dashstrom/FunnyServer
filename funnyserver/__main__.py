@@ -1,8 +1,9 @@
 """File call when module is called as script."""
+from server import FileServer
 
 
 def main() -> None:
-    print("Main")
+    FileServer()
 
 
 if __name__ == "__main__":
