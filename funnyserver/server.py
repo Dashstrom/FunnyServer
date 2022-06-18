@@ -75,5 +75,7 @@ def file_thread(conn: socket.socket, fs: FileServer) -> None:
             res = fs.list_files(filename)
         elif code == DELETE:
             res = fs.delete_file(filename)
+    elif code == UPLOAD:
+        file = utils.read_bytes(conn)  # must flush
     conn.sendall(res.pack())
     conn.close()
