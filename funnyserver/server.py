@@ -1,18 +1,19 @@
 import os
 import socket
-from struct import unpack
 from string import ascii_letters, digits
 from _thread import start_new_thread
 
 from .response import (
-    FileResponse, Response, ACCEPT, DENY, UPLOAD, DOWNLOAD, LIST, DELETE
+    ArrayResponse, FileResponse, Response, ACCEPT, DENY, UPLOAD, DOWNLOAD,
+    LIST, DELETE
 )
+
+from . import utils
 
 HOST = '127.0.0.1'
 PORT = 9999
 STORAGE_DIR = os.path.join(os.path.dirname(__file__), 'storage')
 ALPHA = ascii_letters + digits + "_.-"
-
 
 class FileServer:
 
@@ -29,60 +30,52 @@ class FileServer:
                 print(f'Incoming Connection from {addr}')
                 start_new_thread(file_thread, (conn, self))
 
-    def upload_file(self, filename: str, data: bytes) -> bytes:
+    def upload_file(self, filename: str, data: bytes) -> Response:
         fpath = os.path.join(STORAGE_DIR, filename)
         if not os.path.exists(fpath):
             with open(fpath, 'wb') as f:
                 f.write(data)
-            res = Response(ACCEPT)
+            return Response(ACCEPT)
         else:
-            res = Response(DENY)
-        return res.pack()
+            return Response(DENY)
 
-    def download_file(self, filename: str) -> bytes:
+    def download_file(self, filename: str) -> Response:
         fpath = os.path.join(STORAGE_DIR, filename)
         if not os.path.exists(fpath):
-            res = Response(DENY)
+            return Response(DENY)
         else:
             with open(fpath, 'rb') as f:
-                res = FileResponse(f.read())
-        return res.pack()
+                return FileResponse(f.read())
 
-    def list_files(self, pattern: str) -> bytes:
-        stored_files = os.listdir(STORAGE_DIR)
-        matching_files = []
-        for file in stored_files:
-            if file.startswith(pattern):
-                matching_files.append(file)
-        res = FileResponse("\n".join(matching_files).encode())
-        return res.pack()
-    
-    def delete_file(self, filename: str) -> bytes:
-        fpath = os.path.join(STORAGE_DIR, filename)
-        if not os.path.exists(fpath):
-            res = Response(DENY)
+    def list_files(self, pattern: str) -> Response:
+        matching_files = [file for file in os.listdir(STORAGE_DIR)
+                          if file.startswith(pattern)]
+        return ArrayResponse(matching_files)
+
+    def delete_file(self, filename: str) -> Response:
+        path = os.path.join(STORAGE_DIR, filename)
+        if not os.path.exists(path):
+            return Response(DENY)
         else:
-            os.remove(fpath)
-            res = Response(ACCEPT)
-        return res.pack()
+            os.remove(path)
+            return Response(ACCEPT)
 
 
 def file_thread(conn: socket.socket, fs: FileServer) -> None:
-    code = conn.recv(1)[0]   # Reads 1 byte
-    str_len: int = unpack('>I', conn.recv(4))[0]  # type: ignore
-    filename = conn.recv(str_len).decode('utf8')
-    data = Response(DENY).pack()
-    print(code, str_len, filename)
+    code = utils.read_byte(conn)
+    filename = utils.read_utf(conn)
+    res = Response(DENY)
     if all(c in ALPHA for c in filename):
         if code == UPLOAD:
-            size: int = unpack('>I', conn.recv(4))[0]  # type: ignore
-            file = conn.recv(size)
-            data = fs.upload_file(filename, file)
+            file = utils.read_bytes(conn)
+            res = fs.upload_file(filename, file)
         elif code == DOWNLOAD:
-            data = fs.download_file(filename)
+            res = fs.download_file(filename)
         elif code == LIST:
-            data = fs.list_files(filename)
+            res = fs.list_files(filename)
         elif code == DELETE:
-            data = fs.delete_file(filename)
-    conn.sendall(data)
+            res = fs.delete_file(filename)
+    elif code == UPLOAD:
+        file = utils.read_bytes(conn)  # must flush
+    conn.sendall(res.pack())
     conn.close()
