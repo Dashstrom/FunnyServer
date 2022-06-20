@@ -51,7 +51,7 @@ def security_str(fname: str) -> str:
     fname = fname[:MAX_LENGTH] if len(fname) > MAX_LENGTH else fname
     # Replace accented characters with unaccented characters
     nfkd_fname = unicodedata.normalize('NFKD', fname)
-    fname = u"".join([c for c in nfkd_fname if not unicodedata.combining(c)])
+    fname = "".join(c for c in nfkd_fname if not unicodedata.combining(c))
     # Remove unauthorized characters
     fname = re.sub(UNAUTHORIZED_CHAR, "_", fname)
     return fname

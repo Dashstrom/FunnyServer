@@ -15,6 +15,7 @@ PORT = 9999
 STORAGE_DIR = os.path.join(os.path.dirname(__file__), 'storage')
 ALPHA = ascii_letters + digits + "_.-"
 
+
 class FileServer:
 
     def __init__(self) -> None:
