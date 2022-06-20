@@ -36,4 +36,4 @@ class ArrayResponse(Response):
         self.array = array
 
     def pack(self) -> bytes:
-        return super().pack() + b"".join(map(utils.utf_to_bytes, self.array))
+        return super().pack() + b"".join(map(utils.str_to_bytes, self.array))

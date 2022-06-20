@@ -63,7 +63,7 @@ class FileServer:
 
 def file_thread(conn: socket.socket, fs: FileServer) -> None:
     code = utils.read_byte(conn)
-    filename = utils.read_utf(conn)
+    filename = utils.security_str(utils.bytes_to_str(conn))
     res = Response(DENY)
     if all(c in ALPHA for c in filename):
         if code == UPLOAD:

@@ -1,13 +1,19 @@
 import struct
 import socket
 
+import unicodedata
+import re
 
-def read_utf(stream: socket.socket) -> str:
+UNAUTHORIZED_CHAR = "[^A-Za-z0-9._-]+"
+MAX_LENGTH = 200
+
+
+def bytes_to_str(stream: socket.socket) -> str:
     size: int = struct.unpack('>H', stream.recv(2))[0]  # type: ignore
     return stream.recv(size).decode("utf8")
 
 
-def utf_to_bytes(name: str) -> bytes:
+def str_to_bytes(name: str) -> bytes:
     return struct.pack('>H', len(name)) + name.encode("utf8")
 
 
@@ -38,3 +44,14 @@ def read_bytes(stream: socket.socket) -> bytes:
 
 def bytes_to_bytes(data: bytes) -> bytes:
     return unsigned_long_to_bytes(len(data)) + data
+
+
+def security_str(fname: str) -> str:
+    # Shorten the filename if above MAX_LENGTH
+    fname = fname[:MAX_LENGTH] if len(fname) > MAX_LENGTH else fname
+    # Replace accented characters with unaccented characters
+    nfkd_fname = unicodedata.normalize('NFKD', fname)
+    fname = u"".join([c for c in nfkd_fname if not unicodedata.combining(c)])
+    # Remove unauthorized characters
+    fname = re.sub(UNAUTHORIZED_CHAR, "_", fname)
+    return fname
